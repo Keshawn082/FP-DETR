@@ -71,7 +71,7 @@ class SpectralTransform(nn.Module):
     """Process feature maps in the frequency domain via 2-D real FFT.
 
     Steps:
-      1. rFFT2  → complex spectrum  [B, C, H, H//2+1]
+      1. rFFT2  → complex spectrum  [B, C, H, W//2+1]
       2. Separate real/imag → cat  → 2-channel processing
       3. 1×1 convolution on spectrum
       4. Merge back → irFFT2
@@ -128,9 +128,7 @@ class FFCBlock(nn.Module):
 
         # cross-path signals
         out_l = self.local_conv(x_l) + self.g2l(x_g)
-        out_g = self.global_spec(x_g) + F.relu(
-            nn.functional.conv2d(x_l, self.l2g.weight), inplace=False
-        )
+        out_g = self.global_spec(x_g) + F.relu(self.l2g(x_l), inplace=False)
         return torch.cat([out_l, out_g], dim=1)
 
 

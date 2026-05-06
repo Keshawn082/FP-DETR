@@ -61,12 +61,9 @@ class VarifocalLoss(nn.Module):
         # Varifocal per-element loss
         pos_mask = gt_score > 0
         loss_pos = -gt_score * (
-            gt_score.log() if False  # use BCE form below
-            else (
-                gt_score * torch.log(pred_sigmoid + 1e-9)
-                + (1 - gt_score) * torch.log(1 - pred_sigmoid + 1e-9)
-                - self.alpha * (1 - pred_sigmoid) ** self.gamma * torch.log(1 - pred_sigmoid + 1e-9)
-            )
+            gt_score * torch.log(pred_sigmoid + 1e-9)
+            + (1 - gt_score) * torch.log(1 - pred_sigmoid + 1e-9)
+            - self.alpha * (1 - pred_sigmoid) ** self.gamma * torch.log(1 - pred_sigmoid + 1e-9)
         )
         loss_neg = -(pred_sigmoid ** self.gamma) * torch.log(1 - pred_sigmoid + 1e-9)
 
@@ -170,8 +167,7 @@ def _hungarian_match(
     if num_gt == 0 or num_pred == 0:
         return (
             torch.zeros(0, dtype=torch.long, device=pred_scores.device),
-            torch.zeros(0, dtype=torch.long, device=gt_scores.device
-                        if hasattr(gt_scores, 'device') else pred_scores.device),
+            torch.zeros(0, dtype=torch.long, device=gt_boxes.device),
         )
 
     # Classification cost: focal-style
