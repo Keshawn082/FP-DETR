@@ -128,7 +128,7 @@ class FFCBlock(nn.Module):
 
         # cross-path signals
         out_l = self.local_conv(x_l) + self.g2l(x_g)
-        out_g = self.global_spec(x_g) + F.relu(self.l2g(x_l), inplace=False)
+        out_g = self.global_spec(x_g) + F.relu(self.l2g(x_l))
         return torch.cat([out_l, out_g], dim=1)
 
 

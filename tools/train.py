@@ -56,11 +56,14 @@ def collate_fn(batch):
     return torch.stack(images), list(targets)
 
 
+_WARMUP_MIN_LR_RATIO = 0.01  # minimum LR multiplier during warmup
+
+
 def warmup_lr_scheduler(optimizer, warmup_epochs: int, base_lr: float):
     """Linear warmup scheduler (applied per epoch)."""
     def lr_lambda(epoch):
         if epoch < warmup_epochs:
-            return max(0.01, epoch / warmup_epochs)
+            return max(_WARMUP_MIN_LR_RATIO, epoch / warmup_epochs)
         return 1.0
     return torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 

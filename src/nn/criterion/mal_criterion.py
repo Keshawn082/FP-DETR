@@ -58,14 +58,18 @@ class VarifocalLoss(nn.Module):
             Scalar loss.
         """
         pred_sigmoid = torch.sigmoid(pred_score)
+        neg_sigmoid  = 1 - pred_sigmoid
+        log_pos      = torch.log(pred_sigmoid  + 1e-9)
+        log_neg      = torch.log(neg_sigmoid   + 1e-9)
         # Varifocal per-element loss
         pos_mask = gt_score > 0
+        neg_focal_weight = neg_sigmoid ** self.gamma
         loss_pos = -gt_score * (
-            gt_score * torch.log(pred_sigmoid + 1e-9)
-            + (1 - gt_score) * torch.log(1 - pred_sigmoid + 1e-9)
-            - self.alpha * (1 - pred_sigmoid) ** self.gamma * torch.log(1 - pred_sigmoid + 1e-9)
+            gt_score * log_pos
+            + (1 - gt_score) * log_neg
+            - self.alpha * neg_focal_weight * log_neg
         )
-        loss_neg = -(pred_sigmoid ** self.gamma) * torch.log(1 - pred_sigmoid + 1e-9)
+        loss_neg = -(pred_sigmoid ** self.gamma) * log_neg
 
         loss = torch.where(pos_mask, loss_pos, loss_neg)
         if weight is not None:
